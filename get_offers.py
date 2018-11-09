@@ -1,10 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as Soup
 
-url = 'https://www.naturisimo.com/freeproducts.cfm'
 
-
-def get_links_to_offers(url: str = url) -> list:
+def get_links_to_offers(url: str) -> list:
     links = []
     r = requests.get(url)
     html = Soup(r.text, 'html.parser')
@@ -16,7 +14,21 @@ def get_links_to_offers(url: str = url) -> list:
         links.append(link)
     return links
 
-# TODO test send_notifications
+
+def get_links_on_main_page(url: str) -> list:
+    links = []
+    r = requests.get(url)
+    html = Soup(r.text, 'html.parser')
+    a = html.findAll("a")
+    for i in a:
+        link = i.get('href')
+        if 'cfm' in link and 'www.naturisimo.com/' in link:
+            links.append(link)
+    return links
+
+
 def send_notifications(token: str, chat_id: str, message: str):
-    url = 'https://api.telegram.org/bot<{}>/sendMessage -d chat_id=<{}> -d text="{}"'.format(token, chat_id, message)
-    requests.post(url)
+    requests.post(
+        url='https://api.telegram.org/bot{}/sendMessage'.format(token),
+        data={'chat_id': chat_id, 'text': message}
+    ).json()

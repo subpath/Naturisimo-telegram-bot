@@ -1,6 +1,8 @@
 import sqlite3
 from datetime import datetime
 
+from get_offers import send_notifications
+from config import TOKEN
 
 class DataHandler:
     def __init__(self):
@@ -34,6 +36,11 @@ class DataHandler:
         available_values = self.read_from_table(table)
         if value not in available_values:
             self.write_to_table(table, int(datetime.utcnow().strftime('%s')), value)
+            if table == 'offers':
+                users = self.read_from_table('users')
+                for user in users:
+                    message = "Wow! New offer : {}".format(value)
+                    send_notifications(TOKEN, user, message)
             return True
 
     def delete_user(self, table: str, value: str):
